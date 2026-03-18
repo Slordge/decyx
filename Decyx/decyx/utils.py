@@ -253,12 +253,12 @@ def prepare_prompt(code, variables, action='rename_retype', callers_code=None):
         return None
     prompt = prompt_template
     if callers_code:
-        prompt += "### Additional Context: Callers' Code\n"
+        prompt += u"### Additional Context: Callers' Code\n"
         for caller_name, caller_code in callers_code.items():
-            prompt += "#### Caller: {}\n\n{}\n\n\n".format(safe_str(caller_name), safe_str(caller_code))
-    prompt += "### Code:\n\n{}\n\n".format(safe_str(code))
+            prompt += u"#### Caller: {}\n\n{}\n\n\n".format(safe_str(caller_name), safe_str(caller_code))
+    prompt += u"### Code:\n\n{}\n\n".format(safe_str(code))
     if action != 'line_comments':
-        prompt += "### Variables:\n\n{}\n\n".format(json.dumps(variables, indent=2))
+        prompt += u"### Variables:\n\n{}\n\n".format(json.dumps(variables, indent=2))
     return prompt
 
 # ---------------------------------------------------------------------------
