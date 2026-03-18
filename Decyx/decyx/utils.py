@@ -281,11 +281,13 @@ def safe_str(s):
         return s.decode("utf-8", errors="replace")
 
     try:
-        # Python 2: if it's unicode, just use it as-is (it's valid UTF-8)
+        # Python 2: if it's unicode, encode to UTF-8 and return as unicode
         if isinstance(s, unicode):
+            # Return as-is, the prompt is now unicode so this will work
             return s
     except NameError:
         # Python 3: unicode type doesn't exist
         pass
 
-    return str(s)
+    # For regular strings, just return them
+    return s if isinstance(s, str) else str(s)
