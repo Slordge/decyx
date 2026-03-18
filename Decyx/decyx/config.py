@@ -1,7 +1,7 @@
 # config.py
 # @runtime Jython
 
-OLLAMA_API_URL = "https://192.168.56.1:11434/v1/chat/completions"
+OLLAMA_API_URL = "http://192.168.56.1:11434/v1/chat/completions"
 OLLAMA_MODELS = ["codestral"]
 
 # Set to True to enable fast selection and skip prompt confirmation windows
