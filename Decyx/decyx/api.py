@@ -146,23 +146,22 @@ def get_response_from_claude(prompt, model, monitor, is_explanation=False):
 
         monitor.setMessage("Waiting for response from Ollama API...")
         content = read_response(response)
+        # Debug: save the raw model response to a file for inspection
+        debug_path = os.path.join(os.path.dirname(__file__), "llm_last_response.txt")
+        try:
+            with open(debug_path, "w") as f:
+                if isinstance(content, unicode):
+                    f.write(content.encode('utf-8'))
+                else:
+                    f.write(content)
+            print "Saved raw LLM response to {}".format(debug_path)
+        except Exception as e:
+            print "Failed to write LLM response debug file: {}".format(e)
 
         if content:
             print "Received response from Ollama API."
             response_json = json.loads(content)
             content_text = response_json['choices'][0]['message']['content']
-
-            # Debug: save the raw model response to a file for inspection
-            debug_path = os.path.join(os.path.dirname(__file__), "llm_last_response.txt")
-            try:
-                with open(debug_path, "w") as f:
-                    if isinstance(content_text, unicode):
-                        f.write(content_text.encode('utf-8'))
-                    else:
-                        f.write(content_text)
-                print "Saved raw LLM response to {}".format(debug_path)
-            except Exception as e:
-                print "Failed to write LLM response debug file: {}".format(e)
 
             if is_explanation:
                 return content_text.strip()
