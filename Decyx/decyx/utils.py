@@ -276,6 +276,16 @@ def format_new_type(type_str):
 # ---------------------------------------------------------------------------
 
 def safe_str(s):
+    """Convert to string, handling unicode and non-ASCII characters."""
     if isinstance(s, bytes):
         return s.decode("utf-8", errors="replace")
+
+    try:
+        # Python 2: if it's unicode, just use it as-is (it's valid UTF-8)
+        if isinstance(s, unicode):
+            return s
+    except NameError:
+        # Python 3: unicode type doesn't exist
+        pass
+
     return str(s)
