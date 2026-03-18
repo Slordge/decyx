@@ -8,6 +8,24 @@ from ghidra.program.model.pcode import HighSymbol
 from ghidra.app.decompiler import ClangStatement
 from config import GLOBAL_VARIABLE_PATTERNS
 
+
+def to_py_unicode(value):
+    """Safely convert a value to a Python unicode string.
+
+    This helps avoid implicit ASCII encoding that can raise errors in Jython
+    when encountering non-ASCII characters.
+    """
+    try:
+        return unicode(value)
+    except NameError:
+        # Python 3 / non-Jython context
+        return str(value)
+    except Exception:
+        try:
+            return str(value)
+        except Exception:
+            return u"<unrepresentable>"
+
 def initialize_decompiler():
     """
     Initializes and configures the Ghidra Decompiler interface.
@@ -36,8 +54,7 @@ def traverse_clang_node(node, callback):
         traverse_clang_node(child, callback)
 
 def annotate_code_with_addresses(code_markup):
-    """
-    Annotates the decompiled code with addresses from the Clang AST.
+    """Annotates the decompiled code with addresses from the Clang AST.
 
     Args:
         code_markup (ClangNode): The root node of the Clang AST.
@@ -50,15 +67,7 @@ def annotate_code_with_addresses(code_markup):
     def collect_lines(node):
         if isinstance(node, ClangStatement):
             address = node.getMinAddress()
-            code_line = node.toString()
-            # Handle non-ASCII characters in code_line
-            try:
-                if isinstance(code_line, unicode):
-                    code_line = code_line.encode('utf-8').decode('ascii', 'replace')
-                elif isinstance(code_line, str):
-                    code_line = code_line.decode('utf-8').encode('ascii', 'replace')
-            except (UnicodeDecodeError, UnicodeEncodeError, AttributeError):
-                code_line = ''.join(c if ord(c) < 128 else '?' for c in str(code_line))
+            code_line = to_py_unicode(node.toString())
 
             if address:
                 annotated_line = "// Address: {}\n{}".format(address, code_line)
@@ -204,23 +213,12 @@ def decompile_function(func, current_program, monitor, annotate_addresses=False)
         high_func = results.getHighFunction()
         code_markup = results.getCCodeMarkup()
 
-        # Build the code string first, before any database writes
+        # Build the code string first, before any database writes.
+        # Use a safe unicode conversion to avoid implicit ASCII coercion in Jython.
         if annotate_addresses:
             decompiled_code_str = annotate_code_with_addresses(code_markup)
         else:
-            decompiled_code_str = decompiled_function.getC()
-
-        # Handle non-ASCII characters in decompiled code
-        if decompiled_code_str:
-            try:
-                # Ensure the decompiled code is ASCII-compatible
-                if isinstance(decompiled_code_str, unicode):
-                    decompiled_code_str = decompiled_code_str.encode('utf-8').decode('ascii', 'replace')
-                elif isinstance(decompiled_code_str, str):
-                    decompiled_code_str = decompiled_code_str.decode('utf-8').encode('ascii', 'replace')
-            except (UnicodeDecodeError, UnicodeEncodeError, AttributeError):
-                # Fallback: replace any non-ASCII characters
-                decompiled_code_str = ''.join(c if ord(c) < 128 else '?' for c in str(decompiled_code_str))
+            decompiled_code_str = to_py_unicode(decompiled_function.getC())
 
         # Extract variables from the HighFunction so they match the code string above
         if high_func is not None:
@@ -232,7 +230,13 @@ def decompile_function(func, current_program, monitor, annotate_addresses=False)
         return decompiled_code_str, variables
 
     except Exception as e:
-        print "Exception during decompilation: {}".format(e)
+        try:
+            import traceback
+            print "Exception during decompilation: {}".format(to_py_unicode(e))
+            traceback.print_exc()
+        except Exception:
+            # Fallback if traceback fails due to encoding issues
+            print "Exception during decompilation (unable to print traceback): {}".format(to_py_unicode(e))
         return None, None
     finally:
         decomp_interface.dispose()
@@ -299,16 +303,7 @@ def decompile_callers(callers, current_program, monitor):
             try:
                 results = decomp_interface.decompileFunction(caller, 60, monitor)
                 if results.decompileCompleted():
-                    decompiled_code = results.getDecompiledFunction().getC()
-                    # Handle non-ASCII characters in decompiled code
-                    if decompiled_code:
-                        try:
-                            if isinstance(decompiled_code, unicode):
-                                decompiled_code = decompiled_code.encode('utf-8').decode('ascii', 'replace')
-                            elif isinstance(decompiled_code, str):
-                                decompiled_code = decompiled_code.decode('utf-8').encode('ascii', 'replace')
-                        except (UnicodeDecodeError, UnicodeEncodeError, AttributeError):
-                            decompiled_code = ''.join(c if ord(c) < 128 else '?' for c in str(decompiled_code))
+                    decompiled_code = to_py_unicode(results.getDecompiledFunction().getC())
                     callers_code[caller.getName()] = decompiled_code
                     print "Decompiled caller '{}' successfully.".format(caller.getName())
                 else:
