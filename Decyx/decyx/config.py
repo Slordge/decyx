@@ -17,12 +17,13 @@ PROMPTS = {
         u"Analyze the following decompiled C function code and its variables. Provide the following:\n"
         u"1. A suggested concise and descriptive name for the function.\n"
         u"2. Suggested new names and data types for each variable, including globals if applicable.\n\n"
-        u"Respond with a JSON object containing 'function_name' and 'variables' fields. The 'variables' field should be an array of objects, each containing 'old_name', 'new_name', and 'new_type'.\n\n"
+        u"Respond with a JSON object containing only 'function_name' and 'variables' fields. The 'variables' field should be an array of objects, each containing 'old_name', 'new_name', and 'new_type'.\n\n"
+        u"Do not include any explanations or additional text in the response.\n Only the required JSON object should be returned.\n\n"
     ),
     "explanation": (
         u"Provide a brief detailed explanation of the following decompiled C function code and its variables. "
         u"The explanation should be in-depth but concise, incorporating any meaningful names where applicable.\n\n"
-        u"Respond with a plain text explanation, without any formatting.\n\n"
+        u"Respond with a plain text explanation, without any formatting.\n\n Do not include reasoning steps or the thought process, only the final explanation.\n\n"
     ),
     "line_comments": (
         u"Analyze the following decompiled C function code annotated with addresses. Provide concise, meaningful comments "
@@ -35,7 +36,7 @@ PROMPTS = {
         u"  \"0x401000\": \"Initialize the device object\",\n"
         u"  \"0x401010\": \"Check OS version for compatibility\",\n"
         u"  \"0x401020\": \"Create symbolic link for the device\"\n"
-        u"}\n\n"
+        u"}\n\n Do not include any explanations or additional text in the response, only the required JSON object.\n\n"
     )
 }
 
