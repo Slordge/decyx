@@ -2,7 +2,7 @@
 # @runtime Jython
 
 OLLAMA_API_URL = "http://192.168.56.1:11434/v1/chat/completions"
-OLLAMA_MODELS = ["codestral"]
+OLLAMA_MODELS = ["deepseek-r1"]
 
 # Set to True to enable fast selection and skip prompt confirmation windows
 SKIP_PROMPT_CONFIRMATION = False
