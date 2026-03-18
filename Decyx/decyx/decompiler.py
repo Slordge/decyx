@@ -70,7 +70,8 @@ def annotate_code_with_addresses(code_markup):
             code_line = to_py_unicode(node.toString())
 
             if address:
-                annotated_line = "// Address: {}\n{}".format(address, code_line)
+                # Use a unicode format string to avoid implicit ASCII encoding on Python 2 / Jython
+                annotated_line = u"// Address: {}\n{}".format(address, code_line)
             else:
                 annotated_line = code_line
             annotated_lines.append(annotated_line)
