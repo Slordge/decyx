@@ -59,9 +59,9 @@ class PromptReviewDialog(JFrame):
     def add_buttons(self, panel):
         try:
             button_panel = JPanel()
-            send_button = JButton("Send to Claude API")
+            send_button = JButton("Send to LLM API")
             send_button.addActionListener(lambda e: self.send())
-            send_button.setToolTipText("Send the prompt to the Claude API")
+            send_button.setToolTipText("Send the prompt to the LLM API")
             cancel_button = JButton("Cancel")
             cancel_button.addActionListener(lambda e: self.cancel())
             cancel_button.setToolTipText("Cancel and discard changes")

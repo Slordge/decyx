@@ -55,9 +55,9 @@ def process_action(action, func, current_program, monitor, model, callers_code):
         return False
 
     is_explanation = action == 'explanation'
-    response = get_response_from_claude(final_prompt, api_key, model, monitor, is_explanation=is_explanation)
+    response = get_response_from_claude(final_prompt, model, monitor, is_explanation=is_explanation)
     if not response:
-        print "Failed to get {} from Claude API.".format(action.replace('_', ' '))
+        print "Failed to get {} from Ollama API.".format(action.replace('_', ' '))
         return False
 
     if action == 'rename_retype':
