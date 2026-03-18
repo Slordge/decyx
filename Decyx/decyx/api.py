@@ -64,7 +64,19 @@ def parse_json_response(content):
         try:
             return json.loads(json_str)
         except ValueError as e:
-            print "Failed to parse JSON from Claude's response: {}".format(str(e))
+            # Try to fix common JSON issues
+            print "Initial JSON parse failed: {}".format(str(e))
+            print "Attempting to fix common JSON issues..."
+
+            # Replace invalid escape sequences with placeholders or remove them
+            import re
+            # Replace backslash followed by invalid escape characters
+            json_str = re.sub(r'\\([^"\\\/bfnrtu])', r'\1', json_str)
+
+            try:
+                return json.loads(json_str)
+            except ValueError as e2:
+                print "Failed to parse JSON even after fixing escapes: {}".format(str(e2))
     else:
         print "No JSON object found in Claude's response"
     return None
