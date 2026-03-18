@@ -51,6 +51,15 @@ def annotate_code_with_addresses(code_markup):
         if isinstance(node, ClangStatement):
             address = node.getMinAddress()
             code_line = node.toString()
+            # Handle non-ASCII characters in code_line
+            try:
+                if isinstance(code_line, unicode):
+                    code_line = code_line.encode('utf-8').decode('ascii', 'replace')
+                elif isinstance(code_line, str):
+                    code_line = code_line.decode('utf-8').encode('ascii', 'replace')
+            except (UnicodeDecodeError, UnicodeEncodeError, AttributeError):
+                code_line = ''.join(c if ord(c) < 128 else '?' for c in str(code_line))
+
             if address:
                 annotated_line = "// Address: {}\n{}".format(address, code_line)
             else:
@@ -201,6 +210,18 @@ def decompile_function(func, current_program, monitor, annotate_addresses=False)
         else:
             decompiled_code_str = decompiled_function.getC()
 
+        # Handle non-ASCII characters in decompiled code
+        if decompiled_code_str:
+            try:
+                # Ensure the decompiled code is ASCII-compatible
+                if isinstance(decompiled_code_str, unicode):
+                    decompiled_code_str = decompiled_code_str.encode('utf-8').decode('ascii', 'replace')
+                elif isinstance(decompiled_code_str, str):
+                    decompiled_code_str = decompiled_code_str.decode('utf-8').encode('ascii', 'replace')
+            except (UnicodeDecodeError, UnicodeEncodeError, AttributeError):
+                # Fallback: replace any non-ASCII characters
+                decompiled_code_str = ''.join(c if ord(c) < 128 else '?' for c in str(decompiled_code_str))
+
         # Extract variables from the HighFunction so they match the code string above
         if high_func is not None:
             variables = extract_variables_from_high_function(high_func, decompiled_code_str, current_program)
@@ -279,6 +300,15 @@ def decompile_callers(callers, current_program, monitor):
                 results = decomp_interface.decompileFunction(caller, 60, monitor)
                 if results.decompileCompleted():
                     decompiled_code = results.getDecompiledFunction().getC()
+                    # Handle non-ASCII characters in decompiled code
+                    if decompiled_code:
+                        try:
+                            if isinstance(decompiled_code, unicode):
+                                decompiled_code = decompiled_code.encode('utf-8').decode('ascii', 'replace')
+                            elif isinstance(decompiled_code, str):
+                                decompiled_code = decompiled_code.decode('utf-8').encode('ascii', 'replace')
+                        except (UnicodeDecodeError, UnicodeEncodeError, AttributeError):
+                            decompiled_code = ''.join(c if ord(c) < 128 else '?' for c in str(decompiled_code))
                     callers_code[caller.getName()] = decompiled_code
                     print "Decompiled caller '{}' successfully.".format(caller.getName())
                 else:

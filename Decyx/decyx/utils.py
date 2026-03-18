@@ -227,6 +227,19 @@ def apply_line_comments(func, comments):
     program = func.getProgram()
     listing = program.getListing()
     for address_str, comment in comments.items():
+        # Handle non-ASCII characters in comments by encoding to UTF-8 and then decoding as ASCII with error replacement
+        try:
+            # First ensure it's a string
+            if isinstance(comment, unicode):
+                # In Python 2, encode unicode to UTF-8 bytes, then decode back to ASCII string with replacement
+                comment = comment.encode('utf-8').decode('ascii', 'replace')
+            elif isinstance(comment, str):
+                # If it's already a byte string, decode as UTF-8 then encode back to ASCII
+                comment = comment.decode('utf-8').encode('ascii', 'replace')
+        except (UnicodeDecodeError, UnicodeEncodeError, AttributeError):
+            # Fallback: replace any non-ASCII characters
+            comment = ''.join(c if ord(c) < 128 else '?' for c in str(comment))
+
         address = program.getAddressFactory().getAddress(address_str)
         if address is None:
             print "Warning: Invalid address {}".format(address_str)
@@ -240,6 +253,19 @@ def apply_line_comments(func, comments):
     print "Line comments applied."
 
 def apply_explanation(func, explanation):
+    # Handle non-ASCII characters in explanation by encoding to ASCII-compatible string
+    try:
+        # First ensure it's a string
+        if isinstance(explanation, unicode):
+            # In Python 2, encode unicode to UTF-8 bytes, then decode back to ASCII string with replacement
+            explanation = explanation.encode('utf-8').decode('ascii', 'replace')
+        elif isinstance(explanation, str):
+            # If it's already a byte string, decode as UTF-8 then encode back to ASCII
+            explanation = explanation.decode('utf-8').encode('ascii', 'replace')
+    except (UnicodeDecodeError, UnicodeEncodeError, AttributeError):
+        # Fallback: replace any non-ASCII characters
+        explanation = ''.join(c if ord(c) < 128 else '?' for c in str(explanation))
+
     func.setComment(explanation)
     print "Added explanation as comment to the function."
 
