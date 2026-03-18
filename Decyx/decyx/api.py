@@ -5,7 +5,7 @@
 
 import json
 import urllib2
-from config import CLAUDE_API_URL
+from config import OLLAMA_API_URL
 
 def send_request(url, headers, data):
     """Send a POST request to the specified URL with the given headers and data.
@@ -83,11 +83,9 @@ def get_response_from_claude(prompt, api_key, model, monitor, is_explanation=Fal
         dict or str: The parsed JSON response, or the content string if is_explanation is True.
     """
     try:
-        monitor.setMessage("Sending request to Claude API...")
+        monitor.setMessage("Sending request to Ollama API...")
         headers = {
-            "Content-Type": "application/json",
-            "x-api-key": api_key,
-            "anthropic-version": "2023-06-01"
+            "Content-Type": "application/json"
         }
         data = {
             "model": model,
@@ -96,16 +94,16 @@ def get_response_from_claude(prompt, api_key, model, monitor, is_explanation=Fal
             "temperature": 0.2,
         }
 
-        print "Sending request to Claude API..."
-        response = send_request(CLAUDE_API_URL, headers, data)
+        print "Sending request to Ollama API..."
+        response = send_request(OLLAMA_API_URL, headers, data)
 
-        monitor.setMessage("Waiting for response from Claude API...")
+        monitor.setMessage("Waiting for response from Ollama API...")
         content = read_response(response)
 
         if content:
-            print "Received response from Claude API."
+            print "Received response from Ollama API."
             response_json = json.loads(content)
-            content_text = response_json['content'][0]['text']
+            content_text = response_json['choices'][0]['message']['content']
 
             if is_explanation:
                 return content_text.strip()

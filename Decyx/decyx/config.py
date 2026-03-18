@@ -1,8 +1,8 @@
 # config.py
 # @runtime Jython
 
-CLAUDE_API_URL = "https://api.anthropic.com/v1/messages"
-CLAUDE_MODELS = ["claude-sonnet-4-6"]
+OLLAMA_API_URL = "https://192.168.56.1:11434/v1/chat/completions"
+OLLAMA_MODELS = ["claude-sonnet-4-6"]
 
 # Set to True to enable fast selection and skip prompt confirmation windows
 SKIP_PROMPT_CONFIRMATION = False

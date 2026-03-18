@@ -7,7 +7,7 @@
 # @runtime Jython
 
 from ghidra.framework.preferences import Preferences
-from decyx.config import CLAUDE_MODELS, SKIP_PROMPT_CONFIRMATION
+from decyx.config import OLLAMA_MODELS, SKIP_PROMPT_CONFIRMATION
 from decyx.api import get_response_from_claude
 from decyx.decompiler import decompile_function, decompile_callers
 from decyx.utils import (
@@ -18,17 +18,11 @@ from decyx.gui import *
 
 def get_api_key(preferences):
     """
-    Retrieve the API key from Ghidra's preferences. If the key does not exist,
-    prompt the user to input the Anthropic Claude API key and store it in the preferences.
+    Retrieve the API key from Ghidra's preferences. For Ollama, no API key is required.
+    This function returns an empty string as a placeholder.
     """
-    api_key = preferences.getProperty("ANTHROPIC_API_KEY")
-    if not api_key:
-        api_key = askString("API Key", "Enter your Anthropic Claude API key:", "")
-        if api_key:
-            preferences.setProperty("ANTHROPIC_API_KEY", api_key)
-            preferences.store()
-            print "Anthropic API Key stored in {}.".format(preferences.getFilename())
-    return api_key
+    # Ollama doesn't require an API key
+    return ""
 
 def get_callers_code(func, current_program, monitor):
     """
@@ -90,11 +84,11 @@ def main():
         print "API key is required to proceed."
         return
 
-    if len(CLAUDE_MODELS) == 1:
-        model = CLAUDE_MODELS[0]
+    if len(OLLAMA_MODELS) == 1:
+        model = OLLAMA_MODELS[0]
         print "Using the only available model: {}".format(model)
     else:
-        model = show_model_select_dialog(CLAUDE_MODELS)
+        model = show_model_select_dialog(OLLAMA_MODELS)
         if not model:
             print "Model selection cancelled by user."
             return
