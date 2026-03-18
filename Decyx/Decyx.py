@@ -37,7 +37,7 @@ def get_callers_code(func, current_program, monitor):
     selected_callers = show_caller_selection_dialog(list(callers), current_program, monitor)
     return decompile_callers(selected_callers, current_program, monitor) if selected_callers else None
 
-def process_action(action, func, current_program, monitor, api_key, model, callers_code):
+def process_action(action, func, current_program, monitor, model, callers_code):
     """
     Process a specific action on the decompiled function, sending the data to the Claude API
     and applying the response. Actions can include renaming, retyping variables, adding
