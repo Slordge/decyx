@@ -69,7 +69,7 @@ def parse_json_response(content):
         print "No JSON object found in Claude's response"
     return None
 
-def get_response_from_claude(prompt, api_key, model, monitor, is_explanation=False):
+def get_response_from_claude(prompt, model, monitor, is_explanation=False):
     """Get a response from the Claude API.
 
     Args:

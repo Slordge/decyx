@@ -16,13 +16,13 @@ from decyx.utils import (
 )
 from decyx.gui import *
 
-def get_api_key(preferences):
-    """
-    Retrieve the API key from Ghidra's preferences. For Ollama, no API key is required.
-    This function returns an empty string as a placeholder.
-    """
-    # Ollama doesn't require an API key
-    return ""
+# """ def get_api_key(preferences):
+
+#     Retrieve the API key from Ghidra's preferences. For Ollama, no API key is required.
+#     This function returns an empty string as a placeholder.
+
+#     # Ollama doesn't require an API key
+#     return "" """
 
 def get_callers_code(func, current_program, monitor):
     """
@@ -79,10 +79,10 @@ def main():
     The main entry point of the script. Responsible for gathering API keys,
     selecting models and actions, and processing the actions on the current function.
     """
-    api_key = get_api_key(Preferences)
-    if not api_key:
-        print "API key is required to proceed."
-        return
+    # api_key = get_api_key(Preferences)
+    # if not api_key:
+    #     print "API key is required to proceed."
+    #     return
 
     if len(OLLAMA_MODELS) == 1:
         model = OLLAMA_MODELS[0]
@@ -108,7 +108,7 @@ def main():
 
     for action in selected_actions:
         print "Processing action: {}".format(action)
-        if not process_action(action, func, currentProgram, monitor, api_key, model, callers_code):
+        if not process_action(action, func, currentProgram, monitor, model, callers_code):
             print "Failed to process action: {}".format(action)
             return
 

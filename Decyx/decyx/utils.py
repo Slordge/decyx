@@ -255,8 +255,8 @@ def prepare_prompt(code, variables, action='rename_retype', callers_code=None):
     if callers_code:
         prompt += "### Additional Context: Callers' Code\n"
         for caller_name, caller_code in callers_code.items():
-            prompt += "#### Caller: {}\n\n{}\n\n\n".format(caller_name, caller_code)
-    prompt += "### Code:\n\n{}\n\n".format(code)
+            prompt += "#### Caller: {}\n\n{}\n\n\n".format(safe_str(caller_name), safe_str(caller_code))
+    prompt += "### Code:\n\n{}\n\n".format(safe_str(code))
     if action != 'line_comments':
         prompt += "### Variables:\n\n{}\n\n".format(json.dumps(variables, indent=2))
     return prompt
@@ -270,3 +270,12 @@ def format_new_type(type_str):
     fixed_type = re.sub(r'\*\*+', lambda m: ' ' + ' *' * len(m.group()), fixed_type)
     fixed_type = re.sub(r'\s+', ' ', fixed_type).strip()
     return fixed_type
+
+# ---------------------------------------------------------------------------
+# Catching non-ASCII characters in the prompt that can cause Claude API calls to fail
+# ---------------------------------------------------------------------------
+
+def safe_str(s):
+    if isinstance(s, bytes):
+        return s.decode("utf-8", errors="replace")
+    return str(s)
