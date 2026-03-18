@@ -4,6 +4,7 @@
 # Note: Decyx doesn't use Anthropic's official python API as it is intended for Python 3+
 
 import json
+import os
 import urllib2
 from config import OLLAMA_API_URL
 
@@ -57,28 +58,62 @@ def parse_json_response(content):
     Returns:
         dict: The parsed JSON object, or None if parsing failed.
     """
-    json_start = content.find('{')
-    json_end = content.rfind('}') + 1
-    if json_start != -1 and json_end != -1:
-        json_str = content[json_start:json_end]
+
+    def find_json_object(s):
+        # Find first balanced JSON object in the string.
+        start = s.find('{')
+        if start == -1:
+            return None
+
+        depth = 0
+        in_string = False
+        escape = False
+        for i in range(start, len(s)):
+            ch = s[i]
+            if in_string:
+                if escape:
+                    escape = False
+                elif ch == '\\':
+                    escape = True
+                elif ch == '"':
+                    in_string = False
+                continue
+
+            if ch == '"':
+                in_string = True
+            elif ch == '{':
+                depth += 1
+            elif ch == '}':
+                depth -= 1
+                if depth == 0:
+                    return s[start:i + 1]
+
+        return None
+
+    json_str = find_json_object(content)
+    if not json_str:
+        print "No JSON object found in Claude's response"
+        return None
+
+    try:
+        return json.loads(json_str)
+    except ValueError as e:
+        # Try to fix common JSON issues
+        print "Initial JSON parse failed: {}".format(str(e))
+        print "Attempting to fix common JSON issues..."
+
+        # Replace invalid escape sequences with placeholders or remove them
+        import re
+        # Replace backslash followed by invalid escape characters
+        json_str = re.sub(r'\\([^"\\\/bfnrtu])', r'\1', json_str)
+
         try:
             return json.loads(json_str)
-        except ValueError as e:
-            # Try to fix common JSON issues
-            print "Initial JSON parse failed: {}".format(str(e))
-            print "Attempting to fix common JSON issues..."
+        except ValueError as e2:
+            print "Failed to parse JSON even after fixing escapes: {}".format(str(e2))
+            print "=== JSON snippet ==="
+            print json_str
 
-            # Replace invalid escape sequences with placeholders or remove them
-            import re
-            # Replace backslash followed by invalid escape characters
-            json_str = re.sub(r'\\([^"\\\/bfnrtu])', r'\1', json_str)
-
-            try:
-                return json.loads(json_str)
-            except ValueError as e2:
-                print "Failed to parse JSON even after fixing escapes: {}".format(str(e2))
-    else:
-        print "No JSON object found in Claude's response"
     return None
 
 def get_response_from_claude(prompt, model, monitor, is_explanation=False):
@@ -117,10 +152,25 @@ def get_response_from_claude(prompt, model, monitor, is_explanation=False):
             response_json = json.loads(content)
             content_text = response_json['choices'][0]['message']['content']
 
+            # Debug: save the raw model response to a file for inspection
+            debug_path = os.path.join(os.path.dirname(__file__), "llm_last_response.txt")
+            try:
+                with open(debug_path, "w") as f:
+                    if isinstance(content_text, unicode):
+                        f.write(content_text.encode('utf-8'))
+                    else:
+                        f.write(content_text)
+                print "Saved raw LLM response to {}".format(debug_path)
+            except Exception as e:
+                print "Failed to write LLM response debug file: {}".format(e)
+
             if is_explanation:
                 return content_text.strip()
-            else:
-                return parse_json_response(content_text)
+
+            parsed = parse_json_response(content_text)
+            if parsed is None:
+                print "Failed to parse JSON response. See {} for raw output.".format(debug_path)
+            return parsed
 
         return None
 
