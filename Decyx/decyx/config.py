@@ -24,6 +24,7 @@ PROMPTS = {
         u"Provide a brief detailed explanation of the following decompiled C function code and its variables. "
         u"The explanation should be in-depth but concise, incorporating any meaningful names where applicable.\n\n"
         u"Respond with a plain text explanation, without any formatting.\n\n Do not include reasoning steps or the thought process, only the final explanation.\n\n"
+        u"You are given the calling function for additional context, but only give your explanation for the provided function code and variables.\n\n"
     ),
     "line_comments": (
         u"Analyze the following decompiled C function code annotated with addresses. Provide concise, meaningful comments "
